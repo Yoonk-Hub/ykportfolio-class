@@ -1,121 +1,138 @@
-const menuButton = document.querySelector(".menu-toggle");
-const mainNav = document.querySelector(".main-nav");
-const toast = document.querySelector(".toast");
-const copyButton = document.querySelector(".copy-email");
-const projectDialog = document.querySelector("#project-dialog");
-const dialogCloseButton = document.querySelector(".dialog-close");
-const projectCards = document.querySelectorAll(".project-card[data-project]");
+const menuToggle = document.querySelector(".menu-toggle");
+const siteNav = document.querySelector(".site-nav");
+const navLinks = document.querySelectorAll(".nav-link");
+const contactForm = document.querySelector(".contact-form");
+const formMessage = document.querySelector(".form-message");
 
-const projectDetails = {
-  lumio: {
-    title: "Lumio — 웰니스 루틴 앱",
-    description: "흩어진 건강 데이터를 하나의 일상 루틴으로 연결한 모바일 경험입니다.",
-    role: "프로덕트 디자이너 · 사용자 리서치, UX 설계, UI 디자인",
-    technologies: ["Figma", "FigJam", "Prototyping"],
-    outcome: "샘플: 핵심 건강 지표를 한 화면에 모아 일일 루틴 완료율을 높였습니다."
-  },
-  mori: {
-    title: "Mori — 라이프스타일 커머스",
-    description: "취향 기반 큐레이션으로 쇼핑의 발견하는 재미를 다시 설계했습니다.",
-    role: "프로덕트 디자이너 · 정보 구조, 탐색 경험, 디자인 시스템",
-    technologies: ["Figma", "FigJam", "Design system"],
-    outcome: "샘플: 개인화된 컬렉션을 통해 상품 탐색과 저장 경험을 개선했습니다."
-  },
-  ondo: {
-    title: "Ondo Studio — 브랜드 경험",
-    description: "오래 쓰일 물건의 가치를 온라인에서도 느끼게 하는 브랜드 경험입니다.",
-    role: "브랜드 디자이너 · 아트 디렉션, 웹 경험, 콘텐츠 디자인",
-    technologies: ["Figma", "Illustrator", "Web design"],
-    outcome: "샘플: 제품의 제작 과정과 소재 정보를 강조해 브랜드 스토리 전달을 강화했습니다."
-  }
-};
+menuToggle?.addEventListener("click", () => {
+  const isOpen = siteNav.classList.toggle("is-open");
+  menuToggle.setAttribute("aria-expanded", String(isOpen));
+});
 
-let activeProjectCard = null;
-
-// 모달에 선택된 프로젝트 정보를 채우고, 닫을 때 돌아갈 카드를 기억합니다.
-function openProjectDialog(card) {
-  if (!projectDialog) return;
-
-  const project = projectDetails[card.dataset.project];
-  if (!project) return;
-
-  activeProjectCard = card;
-  projectDialog.querySelector("#dialog-title").textContent = project.title;
-  projectDialog.querySelector("#dialog-description").textContent = project.description;
-  projectDialog.querySelector("#dialog-role").textContent = project.role;
-  projectDialog.querySelector("#dialog-outcome").textContent = project.outcome;
-
-  const technologyList = projectDialog.querySelector("#dialog-technologies");
-  technologyList.replaceChildren(...project.technologies.map((technology) => {
-    const item = document.createElement("li");
-    item.textContent = technology;
-    return item;
-  }));
-
-  projectDialog.showModal();
-  dialogCloseButton.focus();
-}
-
-if (menuButton && mainNav) {
-  menuButton.addEventListener("click", () => {
-    const isOpen = mainNav.classList.toggle("is-open");
-    menuButton.setAttribute("aria-expanded", String(isOpen));
-  });
-
-  mainNav.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => {
-      mainNav.classList.remove("is-open");
-      menuButton.setAttribute("aria-expanded", "false");
-    });
-  });
-}
-
-if (copyButton && toast) {
-  copyButton.addEventListener("click", async () => {
-    const email = copyButton.dataset.email;
-    await navigator.clipboard.writeText(email);
-    toast.textContent = "이메일 주소를 복사했어요.";
-    toast.classList.add("is-visible");
-    window.setTimeout(() => toast.classList.remove("is-visible"), 2200);
-  });
-}
-
-projectCards.forEach((card) => {
-  card.addEventListener("click", () => openProjectDialog(card));
-  card.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    event.preventDefault();
-    openProjectDialog(card);
+navLinks.forEach((link) => {
+  link.addEventListener("click", () => {
+    siteNav.classList.remove("is-open");
+    menuToggle?.setAttribute("aria-expanded", "false");
   });
 });
 
-if (projectDialog && dialogCloseButton) {
-  dialogCloseButton.addEventListener("click", () => projectDialog.close());
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && projectDialog.open) {
-      event.preventDefault();
-      projectDialog.close();
-    }
-  });
-  projectDialog.addEventListener("click", (event) => {
-    if (event.target === projectDialog) projectDialog.close();
-  });
-  projectDialog.addEventListener("close", () => {
-    if (activeProjectCard) activeProjectCard.focus();
-    activeProjectCard = null;
-  });
-}
-
-const year = document.querySelector("#year");
-if (year) year.textContent = new Date().getFullYear();
-
-const revealItems = document.querySelectorAll(".reveal");
-const revealObserver = new IntersectionObserver((entries, observer) => {
+const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
-    if (!entry.isIntersecting) return;
-    entry.target.classList.add("is-visible");
-    observer.unobserve(entry.target);
+    if (entry.isIntersecting) {
+      entry.target.classList.add("is-visible");
+      revealObserver.unobserve(entry.target);
+    }
   });
 }, { threshold: 0.12 });
 
-revealItems.forEach((item) => revealObserver.observe(item));
+document.querySelectorAll(".reveal").forEach((section) => revealObserver.observe(section));
+
+const projectDialog = document.querySelector("#project-dialog");
+const projectDialogTitle = document.querySelector("#project-dialog-title");
+const projectDialogDescription = document.querySelector("#project-dialog-description");
+const projectDialogRole = document.querySelector("#project-dialog-role");
+const projectDialogTechnologies = document.querySelector("#project-dialog-technologies");
+const projectDialogResults = document.querySelector("#project-dialog-results");
+const projectDialogClose = document.querySelector(".project-dialog-close");
+let activeProjectCard = null;
+
+// 카드에 저장된 예시 정보를 모달에 표시하고, 열릴 때 닫기 버튼에 포커스를 둡니다.
+const openProjectDialog = (card) => {
+  const title = card.querySelector("h3");
+  const description = card.querySelector(".project-info p");
+  const { role, technologies, results } = card.dataset;
+
+  if (
+    !projectDialog || !projectDialogTitle || !projectDialogDescription ||
+    !projectDialogRole || !projectDialogTechnologies || !projectDialogResults ||
+    !projectDialogClose || !title || !description || !role || !technologies || !results
+  ) {
+    throw new Error("프로젝트 상세 정보를 표시하는 데 필요한 요소를 찾을 수 없습니다.");
+  }
+
+  projectDialogTitle.textContent = title.textContent.trim();
+  projectDialogDescription.textContent = description.textContent.trim();
+  projectDialogRole.textContent = role;
+  projectDialogTechnologies.textContent = technologies;
+  projectDialogResults.textContent = results;
+  activeProjectCard = card;
+  projectDialog.showModal();
+  projectDialogClose.focus();
+};
+
+document.querySelectorAll(".project-card").forEach((card) => {
+  card.addEventListener("click", () => openProjectDialog(card));
+  card.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openProjectDialog(card);
+    }
+  });
+});
+
+projectDialogClose?.addEventListener("click", () => projectDialog.close());
+projectDialog?.addEventListener("click", (event) => {
+  if (event.target === projectDialog) projectDialog.close();
+});
+// ESC 키를 포함해 모달이 닫히면, 열었던 카드로 키보드 포커스를 되돌립니다.
+projectDialog?.addEventListener("close", () => {
+  activeProjectCard?.focus();
+  activeProjectCard = null;
+});
+
+contactForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const fields = [
+    {
+      input: contactForm.querySelector('[name="name"]'),
+      error: contactForm.querySelector("#name-error"),
+      requiredMessage: "이름을 입력해 주세요.",
+    },
+    {
+      input: contactForm.querySelector('[name="email"]'),
+      error: contactForm.querySelector("#email-error"),
+      requiredMessage: "이메일 주소를 입력해 주세요.",
+    },
+    {
+      input: contactForm.querySelector('[name="message"]'),
+      error: contactForm.querySelector("#message-error"),
+      requiredMessage: "메시지를 입력해 주세요.",
+    },
+  ];
+  let firstInvalidField = null;
+
+  fields.forEach(({ input, error, requiredMessage }) => {
+    if (!input || !error) {
+      throw new Error("문의 양식의 입력 항목 또는 오류 메시지 요소를 찾을 수 없습니다.");
+    }
+
+    const value = input.value.trim();
+    let errorText = "";
+    if (!value) {
+      errorText = requiredMessage;
+    } else if (input instanceof HTMLInputElement && input.type === "email" && input.validity.typeMismatch) {
+      errorText = "올바른 이메일 주소를 입력해 주세요.";
+    }
+
+    error.textContent = errorText;
+    input.setAttribute("aria-invalid", String(Boolean(errorText)));
+    if (errorText && !firstInvalidField) firstInvalidField = input;
+  });
+
+  if (!formMessage) {
+    throw new Error("문의 양식의 결과 메시지 요소를 찾을 수 없습니다.");
+  }
+
+  if (firstInvalidField) {
+    formMessage.textContent = "입력 내용을 확인해 주세요.";
+    formMessage.classList.add("is-error");
+    firstInvalidField.focus();
+    return;
+  }
+
+  formMessage.textContent = "입력값 검증이 완료되었습니다. 실제 이메일은 전송되지 않습니다.";
+  formMessage.classList.remove("is-error");
+});
+
+const currentYear = document.querySelector("#current-year");
+if (currentYear) currentYear.textContent = new Date().getFullYear();
